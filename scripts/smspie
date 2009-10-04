@@ -1,0 +1,154 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+from __future__ import division
+
+# logging, config, IO
+import yaml
+import logging
+import time
+import os
+import sys
+import optparse
+
+#logging.basicConfig(level=logging.DEBUG)
+
+__author__ = "d-fens"
+__version__ = '0.1'
+__copyright__ = 'Copyright (c) 2009 d-fens'
+__license__ = 'MIT License'
+
+# Import Psyco if available
+try:
+	import psyco
+	psyco.full()
+except ImportError:
+	pass
+
+if __name__ == '__main__':
+	p = optparse.OptionParser(description='Send SMS via command line',
+		prog='smspie',
+		version='%prog ' + __version__,
+		usage='%prog 08x-xxxxxxx')
+	p.add_option('-C', '--provider', help='sets the SMS provider')
+	p.add_option('-c', '--config', help='sets path to the config file')
+	p.add_option('-i', '--import-contacts', action='store_true', help='import meteor contacts, copy and paste into the config file')
+	p.add_option('-l', '--list', action='store_true', help='list the people in your phonebook')
+	p.add_option('-m', '--message', help='the message you want to send')
+	p.add_option('-u', '--username', help='set your username')
+	p.add_option('-p', '--password', help='set your password')
+
+	options, arguments = p.parse_args()
+
+	# make sure that SMSPie has a place to save
+	if not os.path.exists(os.path.expanduser('~/.smspie/')):
+		os.mkdir(os.path.expanduser('~/.smspie/'))
+	if not os.path.exists(os.path.expanduser('~/.smspie/config.yaml')):
+		config = """main:
+  use_proxy: false
+  proxy: proxy3.dcu.ie:3128
+  user-agent: 'User-Agent: Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.14) Gecko/2009090216 Ubuntu/9.04 (jaunty) Firefox/3.0.14'
+
+# you can override any of main by putting the same setting inside the sms' name block
+providers:
+  meteor:
+    username: 0851234567
+    password: 9999
+    cookiefile: '~/.smspie/meteor.cookie.cache'
+    referer: 'https://www.mymeteor.ie/'
+  vodaphone:
+    username: 0851234567
+    password: 9999
+    cookiefile: '~/.smspie/vodaphone.cookie.cache'
+    referer: 'https://www.vodaphone.ie/'
+  o2:
+    username: 0851234567
+    password: 9999
+    cookiefile: '~/.smspie/o2.cookie.cache'
+    referer: 'https://www.o2.ie/'
+
+phonebook:"""
+
+		f = open(os.path.expanduser('~/.smspie/config.yaml'), 'w')
+		f.write(config)
+		f.close()
+
+		print "SMSPie has created a default configuations at ~/.smspie/config.yaml, you should edit this before continuing"
+		sys.exit()
+
+	config = yaml.load(open(os.path.expanduser('~/.smspie/config.yaml'), 'r'))
+	# make sure theres is some configuration there
+	if len(config['providers']) < 1:
+		print "SMSPie is missing provider information, you should edit ~/.smspie/config.yaml."
+		sys.exit()
+
+	# it merges the settings from main and the provider into main, so you can override stuff
+	for provider in config['providers']:
+		if str(options.provider).lower() == provider:
+			config['main'].update(config['providers'][provider])
+			provider_config = config['main']
+			break
+
+	if options.username:
+		provider_config['username'] = options.username
+	if options.password:
+		provider_config['username'] = options.password
+
+	# message time! we can do more than one contact
+	if len(arguments) == 1:
+		from smspie.providers import *
+
+		m = meteor.meteor(provider_config)
+		if m.resumable():
+			print "[ Using a session for %s@%s ... ]" % (provider_config['username'], options.provider)
+		else:
+			print "[ Logging in to %s@%s ... ]" % (provider_config['username'], options.provider)
+			m.login(provider_config['username'], provider_config['password'])
+
+		# we can do multiple recipients, but atm meteor can do this
+		# we can save on http requests, but I'm leaving it out for now
+		for argument in arguments:
+			contact = {'username': '', 'phonenumber': ''}
+			try:
+				contact['phonenumber'] = "%010d" % int(argument)
+			except ValueError:
+				for person in config['phonebook']:
+					if person['username'].lower() == argument:
+						contact = person
+						break
+			print "[ Recipient: %s (%s) ]" % (contact['username'], contact['phonenumber'])
+
+			message = ""
+			while 1:
+				try:
+					message = message + raw_input('> ') + "\n"
+				except KeyboardInterrupt:
+					print ""
+					print "Cancelling message."
+					sys.exit()
+				except EOFError:
+					print "" # to cleanup raw_input on CLI
+					break
+			sent = m.message(contact['phonenumber'], message)
+			if sent:
+				print "[ Message sent to %s (%s) ]" % (contact['username'], contact['phonenumber'])
+			else:
+				print "[ Failed to send ... :-( ]"
+	# list our contacts
+	elif options.list:
+		for contact in config['phonebook']:
+			print "%-15s %10s" % (contact['username'], contact['phonenumber'])
+	# we can import contacts (from meteor anyway)
+	elif options.provider and options.import_contacts:
+		if str(options.provider).lower() != "meteor":
+			print "Only Meteor is supported at the moment."
+			sys.exit()
+		from smspie.providers import *
+		m = meteor.meteor(provider_config)
+		m.login(provider_config['username'], provider_config['password'])
+		print "Add the following to the ~/.smspie/config.yaml under the section phonebook"
+		print 
+		print "phonebook:"
+		print yaml.dump(m.import_contacts())
+	# help me!
+	else:
+		p.print_help()
