@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import division
 
 # logging, config, IO
 import yaml
@@ -10,12 +9,18 @@ import os
 import sys
 import optparse
 
-#logging.basicConfig(level=logging.DEBUG)
+import locale
+import gettext
+
+gettext.install('smspie', '/usr/share/locale')
 
 __author__ = "d-fens"
 __version__ = '0.1'
 __copyright__ = 'Copyright (c) 2009 d-fens'
 __license__ = 'MIT License'
+
+CONFIG_DIR = '~/.smspie/'
+CONFIG_FILE = os.path.join(CONFIG_DIR, 'config.yaml')
 
 # Import Psyco if available
 try:
@@ -28,21 +33,33 @@ if __name__ == '__main__':
 	p = optparse.OptionParser(description='Send SMS via command line',
 		prog='smspie',
 		version='%prog ' + __version__,
-		usage='%prog 08x-xxxxxxx')
-	p.add_option('-C', '--provider', help='sets the SMS provider')
-	p.add_option('-c', '--config', help='sets path to the config file')
-	p.add_option('-i', '--import-contacts', action='store_true', help='import meteor contacts, copy and paste into the config file')
-	p.add_option('-l', '--list', action='store_true', help='list the people in your phonebook')
-	p.add_option('-m', '--message', help='the message you want to send')
-	p.add_option('-u', '--username', help='set your username')
-	p.add_option('-p', '--password', help='set your password')
+		usage='%prog 0851234567')
+	p.add_option('-C', '--provider', help=_('sets the SMS provider'))
+	p.add_option('-c', '--config', help=_('sets the path to the config file'))
+	p.add_option('-i', '--import-contacts', action='store_true', help=_('import Meteor contacts, copy and paste into the config file'))
+	p.add_option('-l', '--list', action='store_true', help=_('list the people in your phonebook'))
+	p.add_option('-m', '--message', help=_('the message you want to send'))
+	p.add_option('-u', '--username', help=_('set your username'))
+	p.add_option('-p', '--password', help=_('set your password'))
+	p.add_option('-v', '--verbose', action='count', help=_('set the output as verbose (debug)'))
 
 	options, arguments = p.parse_args()
 
+	# print logging more, or greater, or normal (which is show errors)
+	FORMAT = '%(asctime)s %(levelname)-8s %(name)-12s %(message)s'
+	if options.verbose == 1:
+		logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt='%a, %d %b %Y %H:%M:%S')
+		logging.info("Setting logging level as INFO.")
+	elif options.verbose > 1:
+		logging.basicConfig(level=logging.DEBUG, format=FORMAT, datefmt='%a, %d %b %Y %H:%M:%S')
+		logging.debug("Setting logging level as DEBUG.")
+	else:
+		logging.basicConfig(level=logging.ERROR, format=FORMAT, datefmt='%a, %d %b %Y %H:%M:%S')
+
 	# make sure that SMSPie has a place to save
-	if not os.path.exists(os.path.expanduser('~/.smspie/')):
-		os.mkdir(os.path.expanduser('~/.smspie/'))
-	if not os.path.exists(os.path.expanduser('~/.smspie/config.yaml')):
+	if not os.path.exists(os.path.expanduser(CONFIG_DIR)):
+		os.mkdir(os.path.expanduser(CONFIG_DIR))
+	if not os.path.exists(os.path.expanduser(CONFIG_FILE)):
 		config = """main:
   use_proxy: false
   proxy: proxy3.dcu.ie:3128
@@ -68,17 +85,17 @@ providers:
 
 phonebook:"""
 
-		f = open(os.path.expanduser('~/.smspie/config.yaml'), 'w')
+		f = open(os.path.expanduser(CONFIG_FILE), 'w')
 		f.write(config)
 		f.close()
 
-		print "SMSPie has created a default configuations at ~/.smspie/config.yaml, you should edit this before continuing"
+		print((_("SMSPie has created a default configuations at %s, you should edit this before continuing.") % (CONFIG_FILE)))
 		sys.exit()
 
-	config = yaml.load(open(os.path.expanduser('~/.smspie/config.yaml'), 'r'))
+	config = yaml.load(open(os.path.expanduser(CONFIG_FILE), 'r'))
 	# make sure theres is some configuration there
 	if len(config['providers']) < 1:
-		print "SMSPie is missing provider information, you should edit ~/.smspie/config.yaml."
+		print((_("SMSPie is missing provider information, you should edit %s.") % (CONFIG_FILE)))
 		sys.exit()
 
 	# it merges the settings from main and the provider into main, so you can override stuff
@@ -99,9 +116,9 @@ phonebook:"""
 
 		m = meteor.meteor(provider_config)
 		if m.resumable():
-			print "[ Using a session for %s@%s ... ]" % (provider_config['username'], options.provider)
+			print((_("[ Using a session for %s@%s ... ]") % (provider_config['username'], options.provider)))
 		else:
-			print "[ Logging in to %s@%s ... ]" % (provider_config['username'], options.provider)
+			print((_("[ Logging in to %s@%s ... ]") % (provider_config['username'], options.provider)))
 			m.login(provider_config['username'], provider_config['password'])
 
 		# we can do multiple recipients, but atm meteor can do this
@@ -115,40 +132,40 @@ phonebook:"""
 					if person['username'].lower() == argument:
 						contact = person
 						break
-			print "[ Recipient: %s (%s) ]" % (contact['username'], contact['phonenumber'])
+			print((_("[ Recipient: %s (%s) ]") % (contact['username'], contact['phonenumber'])))
 
 			message = ""
 			while 1:
 				try:
 					message = message + raw_input('> ') + "\n"
 				except KeyboardInterrupt:
-					print ""
-					print "Cancelling message."
+					print("")
+					print((_("Cancelling message.")))
 					sys.exit()
 				except EOFError:
-					print "" # to cleanup raw_input on CLI
+					print("") # to cleanup raw_input on CLI
 					break
 			sent = m.message(contact['phonenumber'], message)
 			if sent:
-				print "[ Message sent to %s (%s) ]" % (contact['username'], contact['phonenumber'])
+				print((_("[ Message sent to %s (%s) ]") % (contact['username'], contact['phonenumber'])))
 			else:
-				print "[ Failed to send ... :-( ]"
+				print((_("[ Failed to send ... :-( ]")))
 	# list our contacts
 	elif options.list:
 		for contact in config['phonebook']:
-			print "%-15s %10s" % (contact['username'], contact['phonenumber'])
+			print(("%-15s %10s" % (contact['username'], contact['phonenumber'])))
 	# we can import contacts (from meteor anyway)
 	elif options.provider and options.import_contacts:
 		if str(options.provider).lower() != "meteor":
-			print "Only Meteor is supported at the moment."
+			print((_("Only Meteor is supported at the moment.")))
 			sys.exit()
 		from smspie.providers import *
 		m = meteor.meteor(provider_config)
 		m.login(provider_config['username'], provider_config['password'])
-		print "Add the following to the ~/.smspie/config.yaml under the section phonebook"
-		print 
-		print "phonebook:"
-		print yaml.dump(m.import_contacts())
+		print((_("Add the following to the %s under the section phonebook") % (CONFIG_FILE)))
+		print() 
+		print("phonebook:")
+		print((yaml.dump(m.import_contacts())))
 	# help me!
 	else:
 		p.print_help()

@@ -18,8 +18,9 @@ class meteor(http):
 		Setup class, takes in a config for our settings
 		"""
 		http.__init__(self)
-		self.config = config # TODO: throw warning on required settings
-		self.logger = logging.getLogger('meteor')
+		self.config = config # TODO: throw warning on required settings 
+
+		self.logger = logging.getLogger(self.__module__)
 
 		if 'proxy' in self.config and 'use_proxy' in self.config and self.config['use_proxy'] and self.config['proxy'] is not None:
 			self.curl.setopt(pycurl.PROXY, self.config['proxy'])
@@ -29,28 +30,34 @@ class meteor(http):
 			self.curl.setopt(pycurl.COOKIEFILE, os.path.expanduser(self.config['cookiefile']))
 			self.curl.setopt(pycurl.COOKIEJAR, os.path.expanduser(self.config['cookiefile']))
 
-	def resumable(self):
+	def resumable(self, expiration=3600):
 		"""
 		"""
 		resume = False
 		if 'cookiefile' in self.config and self.config['cookiefile'] is not None:
-			cookiejar = cookielib.MozillaCookieJar()
 			if os.path.isfile(os.path.expanduser(self.config['cookiefile'])):
+				self.logger.debug("Attempting to use cookiefile %s", self.config['cookiefile'])
 				try:
-					cookiejar.load(os.path.expanduser(self.config['cookiefile']))
+					cookiejar = cookielib.MozillaCookieJar(os.path.expanduser(self.config['cookiefile']))
+					cookiejar.load()
 
 					cookies = 0
 					resume = True # everything loads, but lets check more!
 					for index, cookie in enumerate(cookiejar):
 						cookies = cookies + 1
 						if int(cookie.expires) <= time.time():
+							self.logger.info("%s expired %ss ago", cookie, int(cookie.expires - time.time()))
 							resume = False
 						else:
-							cookie.expires = int(time.time() + (60 * 60))
+							self.logger.debug("%s will expire in %ss", cookie, int(cookie.expires - time.time()))
+							cookie.expires = int(time.time() + expiration)
 					if cookies == 0:
 						resume = False
 
-					cookiejar.save(os.path.expanduser(self.config['cookiefile']))
+					if not resume:
+						cookiejar.clear()
+
+					cookiejar.save()
 				except IOError:
 					return False
 		return resume
