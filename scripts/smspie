@@ -100,7 +100,7 @@ phonebook:"""
 
 	# it merges the settings from main and the provider into main, so you can override stuff
 	for provider in config['providers']:
-		if str(options.provider).lower() == provider:
+		if str(options.provider).lower() == provider.lower():
 			config['main'].update(config['providers'][provider])
 			provider_config = config['main']
 			break
@@ -123,13 +123,14 @@ phonebook:"""
 
 		# we can do multiple recipients, but atm meteor can do this
 		# we can save on http requests, but I'm leaving it out for now
+		# TODO: move this up futher so we can check if the number for this contact exists
 		for argument in arguments:
 			contact = {'username': '', 'phonenumber': ''}
 			try:
 				contact['phonenumber'] = "%010d" % int(argument)
 			except ValueError:
 				for person in config['phonebook']:
-					if person['username'].lower() == argument:
+					if person['username'].lower() == argument.lower():
 						contact = person
 						break
 			print((_("[ Recipient: %s (%s) ]") % (contact['username'], contact['phonenumber'])))
@@ -163,7 +164,7 @@ phonebook:"""
 		m = meteor.meteor(provider_config)
 		m.login(provider_config['username'], provider_config['password'])
 		print((_("Add the following to the %s under the section phonebook") % (CONFIG_FILE)))
-		print() 
+		print("") 
 		print("phonebook:")
 		print((yaml.dump(m.import_contacts())))
 	# help me!
