@@ -72,11 +72,11 @@ providers:
     password: 9999
     cookiefile: '~/.smspie/meteor.cookie.cache'
     referer: 'https://www.mymeteor.ie/'
-  vodaphone:
+  vodafone:
     username: 0851234567
     password: 9999
-    cookiefile: '~/.smspie/vodaphone.cookie.cache'
-    referer: 'https://www.vodaphone.ie/'
+    cookiefile: '~/.smspie/vodafone.cookie.cache'
+    referer: 'https://www.vodafone.ie/'
   o2:
     username: 0851234567
     password: 9999
@@ -112,9 +112,12 @@ phonebook:"""
 
 	# message time! we can do more than one contact
 	if len(arguments) == 1:
-		from smspie.providers import *
+		 # TODO: check __import__ above
+		__import__(smspie.providers + '.' + options.provider.lower())
+		p = sys.modules[smspie.providers + '.' + options.provider.lower()]
+		#p = __import__(smspie.providers + '.' + options.provider.lower(), globals(), locals(), ['*'], -1)
 
-		m = meteor.meteor(provider_config)
+		m = p.meteor(provider_config)
 		if m.resumable():
 			print((_("[ Using a session for %s@%s ... ]") % (provider_config['username'], options.provider)))
 		else:

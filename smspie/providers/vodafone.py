@@ -3,7 +3,7 @@
 import os
 import time
 import re
-import urllibp
+import urllib
 import cookielib
 import pycurl
 from BeautifulSoup import BeautifulSoup

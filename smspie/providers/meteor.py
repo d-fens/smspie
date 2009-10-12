@@ -112,7 +112,7 @@ class meteor(http):
 		params = [
 			('event', "smsAjax"),
 			('func', "addEnteredMsisdns")
-		[
+		]
 		post = [
 			('ajaxRequest', "addEnteredMSISDNs"),
 			('remove', "-"),
