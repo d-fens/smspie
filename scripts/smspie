@@ -99,11 +99,15 @@ phonebook:"""
 		sys.exit()
 
 	# it merges the settings from main and the provider into main, so you can override stuff
+	provider_config = None
 	for provider in config['providers']:
 		if str(options.provider).lower() == provider.lower():
 			config['main'].update(config['providers'][provider])
 			provider_config = config['main']
 			break
+	if not provider_config:
+		print((_("SMSPie is missing provider argument, you should edit %s and add the %s information.") % (CONFIG_FILE, options.provider.lower())))
+		sys.exit()	
 
 	if options.username:
 		provider_config['username'] = options.username
@@ -112,12 +116,11 @@ phonebook:"""
 
 	# message time! we can do more than one contact
 	if len(arguments) == 1:
-		 # TODO: check __import__ above
-		__import__(smspie.providers + '.' + options.provider.lower())
-		p = sys.modules[smspie.providers + '.' + options.provider.lower()]
-		#p = __import__(smspie.providers + '.' + options.provider.lower(), globals(), locals(), ['*'], -1)
+		# importing the required module and class we want
+		k = __import__('smspie.providers.' + options.provider.lower(), globals(), locals(), [options.provider.lower()], -1)
+		p = getattr(k, options.provider.lower())
 
-		m = p.meteor(provider_config)
+		m = p(provider_config)
 		if m.resumable():
 			print((_("[ Using a session for %s@%s ... ]") % (provider_config['username'], options.provider)))
 		else:
@@ -136,6 +139,9 @@ phonebook:"""
 					if person['username'].lower() == argument.lower():
 						contact = person
 						break
+			if contact == {'username': '', 'phonenumber': ''}:
+				print((_("The person wasn't found in your phonebook.")))
+				sys.exit()
 			print((_("[ Recipient: %s (%s) ]") % (contact['username'], contact['phonenumber'])))
 
 			message = ""
