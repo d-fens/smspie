@@ -15,7 +15,7 @@ import gettext
 gettext.install('smspie', '/usr/share/locale')
 
 __author__ = "d-fens"
-__version__ = '0.1'
+__version__ = '0.2'
 __copyright__ = 'Copyright (c) 2009 d-fens'
 __license__ = 'MIT License'
 
@@ -105,9 +105,6 @@ phonebook:"""
 			config['main'].update(config['providers'][provider])
 			provider_config = config['main']
 			break
-	if not provider_config:
-		print((_("SMSPie is missing provider argument, you should edit %s and add the %s information.") % (CONFIG_FILE, options.provider.lower())))
-		sys.exit()	
 
 	if options.username:
 		provider_config['username'] = options.username
@@ -116,6 +113,10 @@ phonebook:"""
 
 	# message time! we can do more than one contact
 	if len(arguments) == 1:
+		if not provider_config:
+			print((_("SMSPie is missing provider argument, you should edit %s and add the relevant information.") % (CONFIG_FILE)))
+			sys.exit()
+
 		# importing the required module and class we want
 		k = __import__('smspie.providers.' + options.provider.lower(), globals(), locals(), [options.provider.lower()], -1)
 		p = getattr(k, options.provider.lower())

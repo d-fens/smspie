@@ -3,7 +3,7 @@ from distutils.core import setup
 from setuptools import find_packages
  
 setup(name='smspie',
-      version='0.1',
+      version='0.2',
       description='Send SMS messages using the providers website.',
       author='d-fens',
       url='http://github.com/d-fens/smspie/',
