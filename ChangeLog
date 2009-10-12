@@ -1,0 +1,23 @@
+2009-10-08  d_fens <d_fens@redbrick.dcu.ie>
+
+  * README.markdown, scripts/smspie: Updated README and smspie TODO for names
+  and also the comparison method was altered
+
+  * smspie/providers/__init__.py: __init__ files missing
+
+2009-10-07  d_fens <d_fens@redbrick.dcu.ie>
+
+  * scripts/smspie, smspie/providers/http.py, smspie/providers/meteor.py:
+  Forgot http class(important), change some py3k bits (probably still not
+  compatible), added logging options with -vvv, changed the script to support
+  localisation but nothing concrete
+
+2009-10-04  d_fens <d_fens@redbrick.dcu.ie>
+
+  * LICENSE, README.markdown, scripts/smspie, setup.py,
+  smspie/providers/meteor.py: Added setup.py, README.markdown, coded the smspie
+  script, coded the meteor functionality
+
+2009-08-27  d_fens <d_fens@redbrick.dcu.ie>
+
+  * : Setup structure

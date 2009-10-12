@@ -91,12 +91,12 @@ class meteor(http):
 			self.logger.info("Unable to resume, running connect from login.")
 			self.connect()
 
-		params = {
-			'username': username,
-			'userpass': password,
-			'returnTo': '/'
-		}	
-		handle = self.post('https://www.mymeteor.ie/go/mymeteor-login-manager', params)
+		post = [
+			('username', username),
+			('userpass', password),
+			('returnTo', '/')
+		]
+		handle = self.post('https://www.mymeteor.ie/go/mymeteor-login-manager', post)
 		soup = BeautifulSoup(handle)
 
 		# TODO: Might be billpay, atlas says the title is different
@@ -109,25 +109,25 @@ class meteor(http):
 		"""
 		Sends a message to the recipient.
 		"""
-		params = {
-			'event': "smsAjax",
-			'func': "addEnteredMsisdns"
-		}
-		post = {
-			'ajaxRequest': "addEnteredMSISDNs",
-			'remove': "-",
-			'add': "0|" + phonenumber
-		}
+		params = [
+			('event', "smsAjax"),
+			('func', "addEnteredMsisdns")
+		[
+		post = [
+			('ajaxRequest', "addEnteredMSISDNs"),
+			('remove', "-"),
+			('add', "0|" + phonenumber)
+		]
 		handle = self.post('https://www.mymeteor.ie/mymeteorapi/index.cfm', post, params)
 		
-		params = {
-			'event': "smsAjax",
-			'func': "sendSMS"
-		}
-		post = {
-			'ajaxRequest': "sendSMS",
-			'messageText': message
-		}
+		params = [
+			('event', "smsAjax"),
+			('func', "sendSMS")
+		]
+		post = [
+			('ajaxRequest', "sendSMS"),
+			('messageText', message)
+		]
 		handle = self.post('https://www.mymeteor.ie/mymeteorapi/index.cfm', post, params)
 
 		messageSentPattern = re.compile('showEl\(\"sentTrue\"\)', re.IGNORECASE)
@@ -141,19 +141,19 @@ class meteor(http):
 
 		If it fails, there is no checks so it returns an empty list.
 		"""
-		params = {
-			'event': "smsAjax",
-			'func': "initFwtPhonebook",
-			'ajaxRequest': "initFwtPhonebook"
-		}
+		params = [
+			('event', "smsAjax"),
+			('func', "initFwtPhonebook"),
+			('ajaxRequest', "initFwtPhonebook")
+		]
 		handle = self.get('https://www.mymeteor.ie/mymeteorapi/index.cfm', params)
 
-		params = {
-			'event': "smsAjax",
-			'func': "searchFWTPhonebook",
-			'ajaxRequest': "searchFwtPhonebook",
-			'searchValue': "All:single"
-		}
+		params = [
+			('event', "smsAjax"),
+			('func', "searchFWTPhonebook"),
+			('ajaxRequest', "searchFwtPhonebook"),
+			('searchValue', "All:single")
+		]
 		handle = self.get('https://www.mymeteor.ie/mymeteorapi/index.cfm', params)
 
 		phonePattern = re.compile('\"Add\"\,\"(.+)"\,\"(08\d{8})\"\,\"(.+)\"\,\"(.+)\"', re.IGNORECASE)

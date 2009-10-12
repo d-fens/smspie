@@ -25,9 +25,12 @@ class http():
 		self.curl.setopt(pycurl.CONNECTTIMEOUT, 30)
 		self.curl.setopt(pycurl.TIMEOUT, 300)
 
-		self.curl.setopt(pycurl.AUTOREFERER, 1)
+		# FIXME: broken in certain pycurl versions, fixes vodafone referers
+		#self.curl.setopt(pycurl.AUTOREFERER, 1)
 
 		self.curl.setopt(pycurl.VERBOSE, 0)
+
+		self.curl.setopt(pycurl.SSLVERSION, 3)
 
 	def get(self, url, params=None):
 		if params:

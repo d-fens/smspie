@@ -2,9 +2,9 @@
 from distutils.core import setup
 from setuptools import find_packages
  
-setup(name='py-smspie',
+setup(name='smspie',
       version='0.1',
-      description='Python application for sending SMS via the providers web interface',
+      description='Send SMS messages using the providers website.',
       author='d-fens',
       url='http://github.com/d-fens/smspie/',
       license = 'MIT',

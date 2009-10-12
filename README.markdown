@@ -1,4 +1,4 @@
-Python application and interfaces for sending SMS using the providers website
+SMSPie
 =============================================================================
 
 About
@@ -77,5 +77,5 @@ Listing the contacts you have
 Extra
 ------------
 Something extra you might like to do is alias the commands, as mentioning what
-section your provider is from is tedious. So alias meteorsms="smspie -C meteor"
+section your provider is from is tedious. So `alias meteorsms="smspie -C meteor"`
 can save you time, and can also be handy for multiple-user systems.
