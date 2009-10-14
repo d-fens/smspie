@@ -23,7 +23,7 @@ class http():
 		self.curl.setopt(pycurl.FOLLOWLOCATION, 1)
 		self.curl.setopt(pycurl.MAXREDIRS, 9)
 		self.curl.setopt(pycurl.CONNECTTIMEOUT, 30)
-		self.curl.setopt(pycurl.TIMEOUT, 300)
+		self.curl.setopt(pycurl.TIMEOUT, 30)
 
 		# FIXME: broken in certain pycurl versions, fixes vodafone referers
 		#self.curl.setopt(pycurl.AUTOREFERER, 1)
