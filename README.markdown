@@ -35,9 +35,18 @@ Usage
 
 Installation
 ------------
+
+### Global
+
 To install run this as root: `python setup.py install`
 
-To do a local install do: `python setup.py install --home="$HOME"`
+### Local
+
+If you've never setup a local install before run `mkdir -p ~/lib/python/`
+
+Then add to your shellrc or change you environment with `export PYTHONPATH=$HOME/lib/python/`
+
+Now do a local install do: `python setup.py install --home="$HOME"`
 
 Examples
 ------------
