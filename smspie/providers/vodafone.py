@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
 import time
@@ -42,7 +41,8 @@ class vodafone(http):
 					cookiejar = cookielib.MozillaCookieJar(os.path.expanduser(self.config['cookiefile']))
 					cookiejar.load()
 
-					return True
+					resume = True
+
 					cookies = 0
 					resume = True # everything loads, but lets check more!
 					for index, cookie in enumerate(cookiejar):
@@ -52,7 +52,6 @@ class vodafone(http):
 							resume = False
 						else:
 							self.logger.debug("%s will expire in %ss", cookie, int(cookie.expires - time.time()))
-							cookie.expires = int(time.time() + expiration)
 					if cookies == 0:
 						resume = False
 

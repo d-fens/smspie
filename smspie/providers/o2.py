@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
 import time
@@ -50,7 +49,6 @@ class o2(http):
 							resume = False
 						else:
 							self.logger.debug("%s will expire in %ss", cookie, int(cookie.expires - time.time()))
-							cookie.expires = int(time.time() + expiration)
 					if cookies == 0:
 						resume = False
 
