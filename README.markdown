@@ -6,9 +6,10 @@ About
 Send SMS messages using the providers website.
 
 As of writting it supports:
- * meteor.ie
- * o2.ie
- * vodafone.ie
+
+* meteor.ie
+* o2.ie
+* vodafone.ie
 
 Usage
 ------------
