@@ -3,8 +3,11 @@ SMSPie
 
 About
 ------------
-Send SMS messages using the providers website. As of writting it supports 
-meteor.ie and will support vodafone and o2 once there are accounts to test with.
+Send SMS messages using the providers website. As of writting it supports
+
+	* meteor.ie
+	* o2.ie
+	* vodafone.ie
 
 Usage
 ------------
