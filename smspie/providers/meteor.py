@@ -35,6 +35,9 @@ class meteor(http):
 		resume = False
 		if 'cookiefile' in self.config and self.config['cookiefile'] is not None:
 			if os.path.isfile(os.path.expanduser(self.config['cookiefile'])):
+				if (time.time() - 3600) > os.path.getmtime(os.path.expanduser(self.config['cookiefile'])):
+					self.logger.debug("Stale cookie cache.")
+					return False
 				self.logger.debug("Attempting to use cookiefile %s", self.config['cookiefile'])
 				try:
 					cookiejar = cookielib.MozillaCookieJar(os.path.expanduser(self.config['cookiefile']))
