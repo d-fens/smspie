@@ -146,16 +146,19 @@ phonebook:"""
 			print((_("[ Recipient: %s (%s) ]") % (contact['username'], contact['phonenumber'])))
 
 			message = ""
-			while 1:
-				try:
-					message = message + raw_input('> ') + "\n"
-				except KeyboardInterrupt:
-					print("")
-					print((_("Cancelling message.")))
-					sys.exit()
-				except EOFError:
-					print("") # to cleanup raw_input on CLI
-					break
+			if options.message:
+				message = options.message
+			else:
+				while 1:
+					try:
+						message = message + raw_input('> ') + "\n"
+					except KeyboardInterrupt:
+						print("")
+						print((_("Cancelling message.")))
+						sys.exit()
+					except EOFError:
+						print("") # to cleanup raw_input on CLI
+						break
 			sent = m.message(contact['phonenumber'], message)
 			if sent:
 				print((_("[ Message sent to %s (%s) ]") % (contact['username'], contact['phonenumber'])))
