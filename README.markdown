@@ -53,6 +53,13 @@ Then add to your shellrc or change you environment with `export PYTHONPATH=$HOME
 
 Now do a local install do: `python setup.py install --home="$HOME"`
 
+Dependencies
+------------
+
+* pyyaml
+* pycurl
+* BeautifulSoup
+
 Examples
 ------------
 Importing contacts for your phonebook
