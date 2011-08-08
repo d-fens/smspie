@@ -32,6 +32,9 @@ class meteor(http):
 	def resumable(self, expiration=3600):
 		"""
 		"""
+		# for now this is broken
+		return False
+
 		resume = False
 		if 'cookiefile' in self.config and self.config['cookiefile'] is not None:
 			if os.path.isfile(os.path.expanduser(self.config['cookiefile'])):
@@ -40,13 +43,13 @@ class meteor(http):
 					return False
 				self.logger.debug("Attempting to use cookiefile %s", self.config['cookiefile'])
 				try:
-					cookiejar = cookielib.MozillaCookieJar(os.path.expanduser(self.config['cookiefile']))
-					cookiejar.load()
+					self.cookiejar = cookielib.MozillaCookieJar(os.path.expanduser(self.config['cookiefile']))
+					self.cookiejar.load()
 					resume = True
 
 					cookies = 0
 					resume = True # everything loads, but lets check more!
-					for index, cookie in enumerate(cookiejar):
+					for index, cookie in enumerate(self.cookiejar):
 						cookies = cookies + 1
 						if int(cookie.expires) <= time.time():
 							self.logger.info("%s expired %ss ago", cookie, int(cookie.expires - time.time()))
@@ -57,9 +60,9 @@ class meteor(http):
 						resume = False
 
 					if not resume:
-						cookiejar.clear()
+						self.cookiejar.clear()
 
-					cookiejar.save()
+					self.cookiejar.save()
 				except IOError:
 					return False
 		return resume

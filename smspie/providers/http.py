@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import sys
 import pycurl
 import urllib
+import logging
 
 try:
 	from cStringIO import StringIO
@@ -13,6 +15,8 @@ class http():
 		"""
 		Setup class, takes in a config for our settings
 		"""
+		self.logger = logging.getLogger(self.__module__)
+
 		self.buffer = StringIO()
 		self.curl = pycurl.Curl()
 
@@ -34,14 +38,20 @@ class http():
 	def get(self, url, params=None):
 		if params:
 			url += "?" + urllib.urlencode(params)
+		self.logger.info("GET " + url)
 		self.curl.setopt(pycurl.URL, url)
 		self.curl.setopt(pycurl.HTTPGET, 1)
 
 		self.buffer = StringIO()
 		self.curl.setopt(pycurl.WRITEFUNCTION, self.buffer.write)
-		self.curl.perform()
+		try:
+			self.curl.perform()
+		except pycurl.error, e:
+			print e
+			sys.exit()
 		s = self.buffer.getvalue()
 		self.buffer.close()
+		self.logger.debug(s)
 		return s
 
 	def post(self, url, params=None, args=None):
@@ -49,14 +59,20 @@ class http():
 			self.curl.setopt(pycurl.POSTFIELDS, urllib.urlencode(params))
 		if args:
 			url += "?" + urllib.urlencode(args)
+		self.logger.info("POST " + url)
 		self.curl.setopt(pycurl.URL, url)
 		self.curl.setopt(pycurl.POST, 1)
 
 		self.buffer = StringIO()
 		self.curl.setopt(pycurl.WRITEFUNCTION, self.buffer.write)
-		self.curl.perform()
+		try:
+			self.curl.perform()
+		except pycurl.error, e:
+			print e
+			sys.exit()
 		s = self.buffer.getvalue()
 		self.buffer.close()
+		self.logger.debug(s)
 		return s
 
 	def close(self):

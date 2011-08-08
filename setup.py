@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-from distutils.core import setup
+# -*- coding: utf-8 -*-
+from setuptools import setup
  
 setup(name='smspie',
       version='0.2',
@@ -9,6 +10,9 @@ setup(name='smspie',
       license = 'MIT',
       packages=['smspie', 'smspie/providers/'],
       scripts=['scripts/smspie'],
+      install_requires=[
+            'PyYAML', 'BeautifulSoup', 'pycurl'
+      ],
       classifiers=[
             'Environment :: Console',
             'Natural Language :: English',
